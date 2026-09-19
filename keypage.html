@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENIxecutor — Daily Key</title>
+<style>
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+         background:#0f0f17; color:#cdd6f4; font-family:Segoe UI, Arial, sans-serif; }
+  .card { background:#181825; border:1px solid #313244; border-radius:14px; padding:36px 48px; text-align:center; }
+  h1 { margin:0 0 6px; font-size:20px; }
+  p  { margin:0 0 20px; color:#6c7086; font-size:13px; }
+  .key { font-size:44px; font-weight:700; letter-spacing:8px; color:#89b4fa; margin:8px 0 20px; }
+  button { background:#89b4fa; color:#11111b; border:0; border-radius:8px; padding:10px 22px;
+           font-weight:600; font-size:14px; cursor:pointer; }
+  button:hover { background:#b4befe; }
+  .date { color:#6c7086; font-size:12px; margin-top:14px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>ENIxecutor Daily Key</h1>
+    <p>Copy this key into the executor. It changes every 24 hours.</p>
+    <div class="key" id="key">······</div>
+    <button onclick="copyKey()">Copy Key</button>
+    <div class="date" id="date"></div>
+  </div>
+
+<script>
+  // ==== MUST match KeySystem.cs and keygen.py ====
+  const SECRET = "ENIX-SECRET-CHANGE-ME-7f3a9b";
+  // ===============================================
+
+  async function sha256hex(str){
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,"0")).join("").toUpperCase();
+  }
+  function utcDate(d){
+    return d.getUTCFullYear() + "-" + String(d.getUTCMonth()+1).padStart(2,"0") + "-" + String(d.getUTCDate()).padStart(2,"0");
+  }
+  async function dailyKey(dateStr){
+    const h = await sha256hex(SECRET + ":" + dateStr);
+    return h.slice(0,6);
+  }
+  let currentKey = "";
+  async function refresh(){
+    const today = utcDate(new Date());
+    currentKey = await dailyKey(today);
+    document.getElementById("key").textContent = currentKey;
+    document.getElementById("date").textContent = "UTC date: " + today;
+  }
+  function copyKey(){
+    navigator.clipboard.writeText(currentKey).then(()=>{});
+    const b = document.querySelector("button"); b.textContent = "Copied!";
+    setTimeout(()=>b.textContent = "Copy Key", 1200);
+  }
+  refresh();
+  setInterval(refresh, 30000); // keep fresh near midnight
+</script>
+</body>
+</html>
