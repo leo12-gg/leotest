@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENIxecutor — Free Roblox Script Executor</title>
+<meta name="description" content="ENIxecutor — a free Roblox script executor with multi-tab editor, ScriptBlox search, daily key system and auto-updating bootstrapper.">
+<style>
+  :root{
+    --bg:#0b0b13; --bg2:#11111b; --panel:#181825; --border:#2c2c3e;
+    --text:#cdd6f4; --muted:#6c7086; --accent:#89b4fa; --accent2:#b4befe;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Inter,Arial,sans-serif;line-height:1.6;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 22px}
+
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(11,11,19,.75);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:18px}
+  .logo .dot{width:11px;height:11px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+  .nav-links{display:flex;gap:26px;font-size:14px}
+  .nav-links a{color:var(--muted);transition:color .2s}
+  .nav-links a:hover{color:var(--text)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 22px;border-radius:9px;font-weight:600;font-size:14px;cursor:pointer;border:0;transition:transform .15s,box-shadow .2s,background .2s}
+  .btn:hover{transform:translateY(-2px)}
+  .btn-accent{background:var(--accent);color:#11111b}
+  .btn-accent:hover{background:var(--accent2);box-shadow:0 6px 24px rgba(137,180,250,.35)}
+  .btn-ghost{background:var(--panel);color:var(--text);border:1px solid var(--border)}
+  .btn-ghost:hover{background:#232336}
+
+  .hero{position:relative;padding:150px 0 90px;text-align:center;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(600px 320px at 20% 20%, rgba(137,180,250,.18), transparent 60%),
+      radial-gradient(600px 320px at 80% 30%, rgba(203,166,247,.16), transparent 60%),
+      radial-gradient(700px 400px at 50% 90%, rgba(137,180,250,.10), transparent 60%);
+    pointer-events:none}
+  .hero::after{content:"";position:absolute;inset:0;opacity:.05;
+    background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+    background-size:44px 44px;mask-image:radial-gradient(ellipse at center,black 40%,transparent 75%);pointer-events:none}
+  .badge{display:inline-block;padding:6px 14px;border-radius:999px;background:rgba(137,180,250,.12);border:1px solid rgba(137,180,250,.35);color:var(--accent);font-size:12px;font-weight:600;letter-spacing:.5px;margin-bottom:20px}
+  h1{font-size:clamp(40px,7vw,72px);font-weight:800;letter-spacing:-1px;line-height:1.05}
+  h1 .grad{background:linear-gradient(90deg,var(--accent),var(--accent2),#cba6f7);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .tag{color:var(--muted);font-size:clamp(15px,2vw,19px);max-width:640px;margin:18px auto 34px}
+  .hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .hero-btns .btn{padding:14px 28px;font-size:15px}
+  .pulse{animation:pulse 2.2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(137,180,250,.45)}70%{box-shadow:0 0 0 16px rgba(137,180,250,0)}100%{box-shadow:0 0 0 0 rgba(137,180,250,0)}}
+
+  section{padding:80px 0}
+  .sec-title{text-align:center;font-size:30px;font-weight:700;margin-bottom:8px}
+  .sec-sub{text-align:center;color:var(--muted);margin-bottom:46px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;transition:transform .18s,border-color .2s,box-shadow .2s}
+  .card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 10px 34px rgba(0,0,0,.4)}
+  .card .ico{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(137,180,250,.12);margin-bottom:14px}
+  .card h3{font-size:16px;margin-bottom:6px}
+  .card p{color:var(--muted);font-size:13.5px}
+
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;counter-reset:s}
+  .step{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:26px;position:relative}
+  .step::before{counter-increment:s;content:counter(s);position:absolute;top:-16px;left:22px;width:34px;height:34px;border-radius:9px;background:var(--accent);color:#11111b;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .step h3{font-size:16px;margin:8px 0 6px}
+  .step p{color:var(--muted);font-size:13.5px}
+
+  .cta{background:linear-gradient(135deg,rgba(137,180,250,.12),rgba(203,166,247,.10));border:1px solid var(--border);border-radius:18px;padding:50px 30px;text-align:center}
+  .cta h2{font-size:28px;margin-bottom:10px}
+  .cta p{color:var(--muted);margin-bottom:24px}
+
+  footer{border-top:1px solid var(--border);padding:34px 0;color:var(--muted);font-size:13px;text-align:center}
+  footer .disc{max-width:720px;margin:0 auto 14px;line-height:1.5}
+  @media(max-width:640px){.nav-links{display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-inner">
+    <div class="logo"><span class="dot"></span>ENIxecutor</div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#download">Download</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="badge">FREE &nbsp;·&nbsp; KEY SYSTEM &nbsp;·&nbsp; AUTO-UPDATES</div>
+    <h1>Run any script with<br><span class="grad">ENIxecutor</span></h1>
+    <p class="tag">A fast Roblox script executor with a multi-tab editor, built-in ScriptBlox search, script hub and a daily key system.</p>
+    <div class="hero-btns">
+      <a href="#" id="btnDownload" class="btn btn-accent pulse">⬇&nbsp; Download</a>
+      <a href="#" id="btnKey" class="btn btn-ghost">🔑&nbsp; Get Key</a>
+    </div>
+  </div>
+</header>
+
+<section id="features">
+  <div class="wrap">
+    <h2 class="sec-title">Features</h2>
+    <p class="sec-sub">Everything you need to build, find and run scripts.</p>
+    <div class="grid">
+      <div class="card"><div class="ico">📝</div><h3>Multi-Tab Editor</h3><p>Tabbed Lua editor with rename, per-tab persistence, keyboard shortcuts and syntax highlighting.</p></div>
+      <div class="card"><div class="ico">🔍</div><h3>Script Search</h3><p>Search ScriptBlox directly in the app — browse trending scripts and run them in one click.</p></div>
+      <div class="card"><div class="ico">🧰</div><h3>Hub &amp; Favorites</h3><p>Built-in popular scripts plus favorites and execution history to re-run anything fast.</p></div>
+      <div class="card"><div class="ico">🎨</div><h3>Themes &amp; Background</h3><p>Accent colors, window opacity, always-on-top and a custom PNG/GIF animated background.</p></div>
+      <div class="card"><div class="ico">🔑</div><h3>Daily Key System</h3><p>A key that changes every 24 hours keeps access in your control.</p></div>
+      <div class="card"><div class="ico">🔄</div><h3>Auto-Updates</h3><p>The bootstrapper keeps your install fresh and wipes stale files on every run.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="how" style="background:var(--bg2)">
+  <div class="wrap">
+    <h2 class="sec-title">How it works</h2>
+    <p class="sec-sub">Up and running in three steps.</p>
+    <div class="steps">
+      <div class="step"><h3>Download &amp; run</h3><p>Grab the bootstrapper and run it — it installs (or updates) ENIxecutor automatically.</p></div>
+      <div class="step"><h3>Get your key</h3><p>Open the app, press <b>Get Key</b>, complete the quick steps and copy the daily key.</p></div>
+      <div class="step"><h3>Attach &amp; execute</h3><p>Join a game, press <b>Inject</b>, paste or pick a script and hit <b>Execute</b>.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="wrap">
+    <div class="cta">
+      <h2>Ready to run?</h2>
+      <p>Download the bootstrapper — it installs ENIxecutor and keeps it up to date.</p>
+      <a href="#" id="btnDownload2" class="btn btn-accent" style="padding:14px 34px;font-size:16px">⬇&nbsp; Download ENIxecutor</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p class="disc">ENIxecutor is an independent project and is not affiliated with, endorsed by, or sponsored by Roblox Corporation. Provided for educational purposes; use responsibly and at your own risk.</p>
+    <p>© <span id="yr"></span> ENIxecutor</p>
+  </div>
+</footer>
+
+<script>
+  // ==== EDIT THESE LINKS ====
+  // Direct download of the bootstrapper exe (hosted in the repo, raw link).
+  const DOWNLOAD_URL = "https://github.com/leo12-gg/leotest/raw/refs/heads/main/ENIxecutor.Bootstrapper.exe";
+  const GETKEY_URL   = "https://work.ink/2Zz2/enixecutor-key";   // your work.ink key link
+  // ==========================
+
+  function bind(id, url){ const el=document.getElementById(id); if(el){ el.href=url; el.target="_blank"; el.rel="noopener"; } }
+  bind("btnDownload", DOWNLOAD_URL);
+  bind("btnDownload2", DOWNLOAD_URL);
+  bind("btnKey", GETKEY_URL);
+  document.getElementById("yr").textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
